@@ -14,9 +14,10 @@ var (
 )
 
 type (
-	Msg          = stan.Msg
-	NatsMsg      = nats.Msg
-	Subscription = stan.Subscription
+	Msg              = stan.Msg
+	NatsMsg          = nats.Msg
+	Subscription     = stan.Subscription
+	NatsSubscription = nats.Subscription
 )
 
 func SetupNats(host string, port int, user string, pass string, closeHandler *grawt.CloseHandler) error {
@@ -64,6 +65,9 @@ func SetupStan(clusterName string, clientId string, host string, port int, user 
 }
 
 func FinalizeStan(subscriptions *[]Subscription) error {
+	if StanClient == nil {
+		return fmt.Errorf("stan client is not initialized")
+	}
 	for _, subscription := range *subscriptions {
 		_ = subscription.Unsubscribe()
 	}
@@ -71,6 +75,19 @@ func FinalizeStan(subscriptions *[]Subscription) error {
 	if err := StanClient.Close(); err != nil {
 		return fmt.Errorf("cannot disconnect from STAN")
 	}
+
+	return nil
+}
+
+func FinalizeNats(subscriptions *[]*NatsSubscription) error {
+	if StanClient == nil {
+		return fmt.Errorf("stan client is not initialized")
+	}
+	for _, subscription := range *subscriptions {
+		_ = subscription.Unsubscribe()
+	}
+
+	NatsClient.Close()
 
 	return nil
 }
