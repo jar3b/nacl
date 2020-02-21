@@ -80,7 +80,7 @@ func FinalizeStan(subscriptions *[]Subscription) error {
 }
 
 func FinalizeNats(subscriptions *[]*NatsSubscription) error {
-	if StanClient == nil {
+	if NatsClient == nil {
 		return fmt.Errorf("stan client is not initialized")
 	}
 	for _, subscription := range *subscriptions {
