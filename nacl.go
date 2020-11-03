@@ -34,7 +34,9 @@ func SetupNats(host string, port int, user string, pass string, closeHandler *gr
 	NatsClient, err = nats.Connect(
 		connectionString,
 		nats.ClosedHandler(func(conn *nats.Conn) {
-			closeHandler.Halt(nil)
+			if closeHandler != nil {
+				closeHandler.Halt(nil)
+			}
 		}),
 		nats.MaxReconnects(5),
 		nats.ReconnectWait(time.Second*2),
@@ -68,8 +70,11 @@ func FinalizeStan(subscriptions *[]Subscription) error {
 	if StanClient == nil {
 		return fmt.Errorf("stan client is not initialized")
 	}
-	for _, subscription := range *subscriptions {
-		_ = subscription.Unsubscribe()
+
+	if subscriptions != nil {
+		for _, subscription := range *subscriptions {
+			_ = subscription.Unsubscribe()
+		}
 	}
 
 	if err := StanClient.Close(); err != nil {
@@ -83,8 +88,11 @@ func FinalizeNats(subscriptions *[]*NatsSubscription) error {
 	if NatsClient == nil {
 		return fmt.Errorf("stan client is not initialized")
 	}
-	for _, subscription := range *subscriptions {
-		_ = subscription.Unsubscribe()
+
+	if subscriptions != nil {
+		for _, subscription := range *subscriptions {
+			_ = subscription.Unsubscribe()
+		}
 	}
 
 	NatsClient.Close()
