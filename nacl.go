@@ -5,12 +5,15 @@ import (
 	"github.com/jar3b/grawt"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
+	"sync"
 	"time"
 )
 
 var (
 	NatsClient *nats.Conn
 	StanClient stan.Conn
+	natsLock   = sync.Mutex{}
+	stanLock   = sync.Mutex{}
 )
 
 type (
@@ -21,6 +24,8 @@ type (
 )
 
 func SetupNats(host string, port int, user string, pass string, closeHandler *grawt.CloseHandler) error {
+	natsLock.Lock()
+	defer natsLock.Unlock()
 	var err error
 
 	// init connection string
@@ -49,6 +54,9 @@ func SetupNats(host string, port int, user string, pass string, closeHandler *gr
 }
 
 func SetupStan(clusterName string, clientId string, host string, port int, user string, pass string, closeHandler *grawt.CloseHandler) (err error) {
+	stanLock.Lock()
+	defer stanLock.Unlock()
+
 	if err = SetupNats(host, port, user, pass, closeHandler); err != nil {
 		return err
 	}
@@ -67,6 +75,8 @@ func SetupStan(clusterName string, clientId string, host string, port int, user 
 }
 
 func FinalizeStan(subscriptions *[]Subscription) error {
+	stanLock.Lock()
+	defer stanLock.Unlock()
 	if StanClient == nil {
 		return fmt.Errorf("stan client is not initialized")
 	}
@@ -85,6 +95,8 @@ func FinalizeStan(subscriptions *[]Subscription) error {
 }
 
 func FinalizeNats(subscriptions *[]*NatsSubscription) error {
+	natsLock.Lock()
+	defer natsLock.Unlock()
 	if NatsClient == nil {
 		return fmt.Errorf("stan client is not initialized")
 	}
