@@ -16,13 +16,6 @@ var (
 	stanLock   = sync.Mutex{}
 )
 
-type (
-	Msg              = stan.Msg
-	NatsMsg          = nats.Msg
-	Subscription     = stan.Subscription
-	NatsSubscription = nats.Subscription
-)
-
 func SetupNatsWithCreds(host string, port int, credsFile string, closeHandler *grawt.CloseHandler) error {
 	natsLock.Lock()
 	defer natsLock.Unlock()
@@ -98,7 +91,7 @@ func SetupStan(clusterName string, clientId string, host string, port int, user 
 	return nil
 }
 
-func FinalizeStan(subscriptions *[]Subscription) error {
+func FinalizeStan(subscriptions *[]stan.Subscription) error {
 	stanLock.Lock()
 	defer stanLock.Unlock()
 	if StanClient == nil {
@@ -118,7 +111,7 @@ func FinalizeStan(subscriptions *[]Subscription) error {
 	return nil
 }
 
-func FinalizeNats(subscriptions *[]*NatsSubscription) error {
+func FinalizeNats(subscriptions *[]*nats.Subscription) error {
 	natsLock.Lock()
 	defer natsLock.Unlock()
 	if NatsClient == nil {
