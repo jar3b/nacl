@@ -12,6 +12,7 @@ import (
 var (
 	NatsClient *nats.Conn
 	StanClient stan.Conn
+	JsClient   nats.JetStreamContext
 	natsLock   = sync.Mutex{}
 	stanLock   = sync.Mutex{}
 )
@@ -35,6 +36,20 @@ func SetupNatsWithCreds(host string, port int, credsFile string, closeHandler *g
 	)
 	if err != nil {
 		return fmt.Errorf("cannot connect to NATS: %v", err)
+	}
+
+	return nil
+}
+
+func SetupJetStream(host string, port int, credsFile string, closeHandler *grawt.CloseHandler, opts ...nats.JSOpt) error {
+	var err error
+	if err := SetupNatsWithCreds(host, port, credsFile, closeHandler); err != nil {
+		return err
+	}
+
+	JsClient, err = NatsClient.JetStream(opts...)
+	if err != nil {
+		return fmt.Errorf("Cannot init JS: %v", err)
 	}
 
 	return nil
@@ -127,4 +142,8 @@ func FinalizeNats(subscriptions *[]*nats.Subscription) error {
 	NatsClient.Close()
 
 	return nil
+}
+
+func FinalizeJetStream(subscriptions *[]*nats.Subscription) error {
+	return FinalizeNats(subscriptions)
 }
