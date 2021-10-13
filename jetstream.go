@@ -30,7 +30,7 @@ func FinalizeJetStream(subscriptions *[]*nats.Subscription) error {
 }
 
 func AddOrUpdateStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error) {
-	_, err := JsClient.StreamInfo("metric-stream")
+	_, err := JsClient.StreamInfo(cfg.Name)
 	if err != nil && err.Error() != "nats: stream not found" {
 		return nil, err
 	}
