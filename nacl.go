@@ -19,16 +19,23 @@ func SetupNatsWithCreds(host string, port int, credsFile string, closeHandler *g
 	var err error
 
 	// connect
-	NatsClient, err = nats.Connect(
-		fmt.Sprintf("nats://%s:%d", host, port),
-		nats.UserCredentials(credsFile),
+	options := []nats.Option{
 		nats.ClosedHandler(func(conn *nats.Conn) {
 			if closeHandler != nil {
 				closeHandler.Halt(nil)
 			}
 		}),
 		nats.MaxReconnects(5),
-		nats.ReconnectWait(time.Second*2),
+		nats.ReconnectWait(time.Second * 2),
+	}
+
+	if credsFile != "" {
+		options = append(options, nats.UserCredentials(credsFile))
+	}
+
+	NatsClient, err = nats.Connect(
+		fmt.Sprintf("nats://%s:%d", host, port),
+		options...,
 	)
 	if err != nil {
 		return fmt.Errorf("cannot connect to NATS: %v", err)
@@ -37,7 +44,7 @@ func SetupNatsWithCreds(host string, port int, credsFile string, closeHandler *g
 	return nil
 }
 
-func SetupNats(host string, port int, user string, pass string, closeHandler *grawt.CloseHandler) error {
+func SetupNatsWithPass(host string, port int, user string, pass string, closeHandler *grawt.CloseHandler) error {
 	natsLock.Lock()
 	defer natsLock.Unlock()
 	var err error
