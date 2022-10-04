@@ -13,7 +13,7 @@ var (
 	natsLock   = sync.Mutex{}
 )
 
-func SetupNatsWithCreds(host string, port int, credsFile string, closeHandler *grawt.CloseHandler) error {
+func SetupNatsWithCreds(natsURL string, credsFile string, closeHandler *grawt.CloseHandler) error {
 	natsLock.Lock()
 	defer natsLock.Unlock()
 	var err error
@@ -34,7 +34,7 @@ func SetupNatsWithCreds(host string, port int, credsFile string, closeHandler *g
 	}
 
 	NatsClient, err = nats.Connect(
-		fmt.Sprintf("nats://%s:%d", host, port),
+		fmt.Sprintf(natsURL),
 		options...,
 	)
 	if err != nil {
@@ -44,21 +44,14 @@ func SetupNatsWithCreds(host string, port int, credsFile string, closeHandler *g
 	return nil
 }
 
-func SetupNatsWithPass(host string, port int, user string, pass string, closeHandler *grawt.CloseHandler) error {
+func SetupNatsWithURL(natsURL string, user string, pass string, closeHandler *grawt.CloseHandler) error {
 	natsLock.Lock()
 	defer natsLock.Unlock()
 	var err error
 
-	// init connection string
-	connectionString := fmt.Sprintf("%s:%d", host, port)
-	if user != "" && pass != "" {
-		connectionString = fmt.Sprintf("%s:%s@%s", user, pass, connectionString)
-	}
-	connectionString = fmt.Sprintf("nats://%s", connectionString)
-
 	// connect
 	NatsClient, err = nats.Connect(
-		connectionString,
+		natsURL,
 		nats.ClosedHandler(func(conn *nats.Conn) {
 			if closeHandler != nil {
 				closeHandler.Halt(nil)
