@@ -13,7 +13,11 @@ var (
 
 func SetupJetStream(host string, port int, credsFile string, closeHandler *grawt.CloseHandler, opts ...nats.JSOpt) error {
 	var err error
-	if err := SetupNatsWithCreds(host, port, credsFile, closeHandler); err != nil {
+	if err := SetupNatsWithCreds(
+		fmt.Sprintf("nats://%s:%d", host, port),
+		credsFile,
+		closeHandler,
+	); err != nil {
 		return err
 	}
 
