@@ -11,11 +11,12 @@ var (
 	JsClient nats.JetStreamContext
 )
 
-func SetupJetStream(host string, port int, credsFile string, closeHandler *grawt.CloseHandler, opts ...nats.JSOpt) error {
+func SetupJetStream(host string, port int, credsFile string, appName string, closeHandler *grawt.CloseHandler, opts ...nats.JSOpt) error {
 	var err error
 	if err := SetupNatsWithCreds(
 		fmt.Sprintf("nats://%s:%d", host, port),
 		credsFile,
+		appName,
 		closeHandler,
 	); err != nil {
 		return err
