@@ -18,7 +18,7 @@ func SetupNatsWithCreds(
 	credsFile string,
 	appName string,
 	closeHandler *grawt.CloseHandler,
-	errorHandler *nats.ErrHandler,
+	errorHandler nats.ErrHandler,
 ) error {
 	natsLock.Lock()
 	defer natsLock.Unlock()
@@ -37,7 +37,7 @@ func SetupNatsWithCreds(
 	}
 
 	if errorHandler != nil {
-		options = append(options, nats.ErrorHandler(*errorHandler))
+		options = append(options, nats.ErrorHandler(errorHandler))
 	}
 
 	if credsFile != "" {
