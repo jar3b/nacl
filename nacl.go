@@ -13,7 +13,13 @@ var (
 	natsLock   = sync.Mutex{}
 )
 
-func SetupNatsWithCreds(natsURL string, credsFile string, appName string, closeHandler *grawt.CloseHandler) error {
+func SetupNatsWithCreds(
+	natsURL string,
+	credsFile string,
+	appName string,
+	closeHandler *grawt.CloseHandler,
+	errorHandler *nats.ErrHandler,
+) error {
 	natsLock.Lock()
 	defer natsLock.Unlock()
 	var err error
@@ -28,6 +34,10 @@ func SetupNatsWithCreds(natsURL string, credsFile string, appName string, closeH
 		nats.MaxReconnects(5),
 		nats.ReconnectWait(time.Second * 2),
 		nats.Name(appName),
+	}
+
+	if errorHandler != nil {
+		options = append(options, nats.ErrorHandler(*errorHandler))
 	}
 
 	if credsFile != "" {

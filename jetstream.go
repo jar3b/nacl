@@ -18,6 +18,7 @@ func SetupJetStream(host string, port int, credsFile string, appName string, clo
 		credsFile,
 		appName,
 		closeHandler,
+		nil,
 	); err != nil {
 		return err
 	}
