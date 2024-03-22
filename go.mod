@@ -1,10 +1,10 @@
 module github.com/jar3b/nacl
 
-go 1.22.0
+go 1.22.1
 
 require (
 	github.com/jar3b/grawt v0.1.12
-	github.com/nats-io/nats.go v1.33.1
+	github.com/nats-io/nats.go v1.34.0
 )
 
 require (
