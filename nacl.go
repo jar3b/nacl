@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jar3b/grawt"
 	"github.com/nats-io/nats.go"
+	"log"
 	"sync"
 	"time"
 )
@@ -34,6 +35,12 @@ func SetupNatsWithCreds(
 		nats.MaxReconnects(5),
 		nats.ReconnectWait(time.Second * 2),
 		nats.Name(appName),
+		nats.ConnectHandler(func(conn *nats.Conn) {
+			log.Printf("NATS Connected to %v\n", conn)
+		}),
+		nats.DisconnectErrHandler(func(conn *nats.Conn, err error) {
+			log.Printf("NATS Disconnected: conn=%v, err=%v\n", conn, err)
+		}),
 	}
 
 	if errorHandler != nil {
