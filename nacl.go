@@ -62,6 +62,45 @@ func SetupNatsWithCreds(
 	return nil
 }
 
+func SetupNatsV2(
+	natsURL string,
+	credsFile string,
+	appName string,
+	closeHandler *grawt.CloseHandler,
+	natsOptions ...nats.Option,
+) error {
+	natsLock.Lock()
+	defer natsLock.Unlock()
+	var err error
+
+	// connect
+	options := []nats.Option{
+		nats.ClosedHandler(func(conn *nats.Conn) {
+			if closeHandler != nil {
+				closeHandler.Halt(nil)
+			}
+		}),
+		nats.MaxReconnects(5),
+		nats.ReconnectWait(time.Second * 2),
+		nats.Name(appName),
+	}
+	options = append(options, natsOptions...)
+
+	if credsFile != "" {
+		options = append(options, nats.UserCredentials(credsFile))
+	}
+
+	NatsClient, err = nats.Connect(
+		fmt.Sprintf(natsURL),
+		options...,
+	)
+	if err != nil {
+		return fmt.Errorf("cannot connect to NATS: %v", err)
+	}
+
+	return nil
+}
+
 func FinalizeNats(subscriptions *[]*nats.Subscription) error {
 	natsLock.Lock()
 	defer natsLock.Unlock()
